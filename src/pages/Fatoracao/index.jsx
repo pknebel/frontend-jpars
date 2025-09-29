@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './styles.css';
 
-export default function RemocaoRecursao() {
+export default function Fatoracao() {
   const navigate = useNavigate();
   const location = useLocation();
   
   // Estados da aplicação
   const [selectedWorkflow, setSelectedWorkflow] = useState(null);
-  const [gramaticaTransformada, setGramaticaTransformada] = useState('');
+  const [gramaticaFatorada, setGramaticaFatorada] = useState('');
   const [isValidated, setIsValidated] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,14 +43,14 @@ export default function RemocaoRecursao() {
         const workflows = await response.json();
         console.log('Workflows recebidos:', workflows);
         
-        // Buscar um workflow que tenha recursão (possuiRecursao = true)
-        const workflowComRecursao = workflows.find(w => w.possuiRecursao === true);
+        // Buscar um workflow que tenha fatoração (possuiFatoracao = true)
+        const workflowComFatoracao = workflows.find(w => w.possuiFatoracao === true);
         
-        if (workflowComRecursao) {
-          setSelectedWorkflow(workflowComRecursao);
-          console.log('Workflow com recursão carregado:', workflowComRecursao);
+        if (workflowComFatoracao) {
+          setSelectedWorkflow(workflowComFatoracao);
+          console.log('Workflow com fatoração carregado:', workflowComFatoracao);
         } else {
-          // Se não encontrar nenhum com recursão, usar o primeiro
+          // Se não encontrar nenhum com fatoração, usar o primeiro
           setSelectedWorkflow(workflows[0]);
           console.log('Workflow padrão carregado:', workflows[0]);
         }
@@ -71,10 +71,10 @@ export default function RemocaoRecursao() {
     fetchSelectedWorkflow();
   }, []);
 
-  // Função para validar a gramática transformada
+  // Função para validar a gramática fatorada
   const handleValidate = async () => {
-    if (!gramaticaTransformada.trim()) {
-      setMessage('Por favor, escreva a gramática transformada no campo à direita.');
+    if (!gramaticaFatorada.trim()) {
+      setMessage('Por favor, escreva a gramática fatorada no campo à direita.');
       setMessageType('error');
       return;
     }
@@ -85,12 +85,12 @@ export default function RemocaoRecursao() {
     try {
       const payload = {
         idWorkflow: selectedWorkflow.idWorkflow,
-        gramaticaEntrada: gramaticaTransformada.replace(/\r?\n/g, '\n')
+        gramaticaEntrada: gramaticaFatorada.replace(/\r?\n/g, '\n')
       };
 
       console.log('Enviando para validação:', payload);
 
-      const response = await fetch('http://localhost:8080/jpars/gramatica/validar-recursao', {
+      const response = await fetch('http://localhost:8080/jpars/gramatica/validar-fatoracao', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -110,7 +110,6 @@ export default function RemocaoRecursao() {
       }
     } catch (error) {
       console.error('Erro na validação:', error);
-      
       setMessage(`Erro: ${error.message}`);
       setMessageType('error');
     } finally {
@@ -126,17 +125,13 @@ export default function RemocaoRecursao() {
       return;
     }
 
-    // Verificar se o workflow tem fatoração para decidir o próximo passo
-    if (selectedWorkflow.possuiFatoracao) {
-      navigate('/fatoracao-esquerda');
-    } else {
-      navigate('/calculo-first-follow');
-    }
+    // Redirecionar para a tela de First/Follow (próxima etapa)
+    navigate('/calculo-first-follow');
   };
 
   if (isLoading) {
     return (
-      <div className="remocao-recursao">
+      <div className="fatoracao">
         <div className="loading">
           <div className="spinner"></div>
           <p>Carregando gramática...</p>
@@ -147,7 +142,7 @@ export default function RemocaoRecursao() {
 
   if (!selectedWorkflow) {
     return (
-      <div className="remocao-recursao">
+      <div className="fatoracao">
         <div className="error">
           <h2>Erro</h2>
           <p>Não foi possível carregar a gramática.</p>
@@ -158,41 +153,41 @@ export default function RemocaoRecursao() {
   }
 
   return (
-    <div className="remocao-recursao">
+    <div className="fatoracao">
       {/* Título da Tela */}
       <header className="header">
-        <h1>Remoção da Recursão à Esquerda</h1>
+        <h1>Fatoração de Gramática</h1>
       </header>
 
       <main className="main-content">
-        {/* Explicação sobre Recursão à Esquerda */}
+        {/* Explicação sobre Fatoração */}
         <section className="info-section">
-          <h2>O que é Recursão à Esquerda</h2>
+          <h2>O que é Fatoração</h2>
           <div className="info-box">
             <p>
-              Algumas gramáticas usam regras que se referem a si mesmas no início da produção, 
-              por exemplo <code>A → A a</code> — isso é chamado de recursão à esquerda. 
-              Como esse tipo de estrutura pode causar problemas em analisadores sintáticos, 
-              é necessário reescrevê-la para que não comece com o mesmo símbolo.
+              A fatoração é uma técnica usada para eliminar ambiguidades em gramáticas, 
+              especialmente quando há múltiplas produções que começam com o mesmo símbolo. 
+              Por exemplo, se temos <code>A → aB | aC</code>, podemos fatorar para 
+              <code>A → aA'</code> e <code>A' → B | C</code>.
             </p>
           </div>
         </section>
 
-        {/* Explicação sobre como eliminar a recursão */}
+        {/* Explicação sobre como fazer fatoração */}
         <section className="info-section">
-          <h2>Como eliminar a recursão</h2>
+          <h2>Como fazer fatoração</h2>
           <div className="info-box">
             <p>
-              Quando uma produção tem a forma: <code>A → Aα | β</code>, ela é recursiva à esquerda 
-              e precisa ser reescrita.
+              Quando uma gramática tem produções que começam com o mesmo símbolo, 
+              como <code>A → aB | aC | aD</code>, ela precisa ser fatorada.
             </p>
             <p>A transformação consiste em:</p>
             <div className="code-example">
-              <code>A → β A'</code><br />
-              <code>A' → α A' | ε</code>
+              <code>A → aA'</code><br />
+              <code>A' → B | C | D</code>
             </div>
             <p>
-              Assim, a recursão é removida e a gramática se torna adequada para análise preditiva.
+              Assim, a ambiguidade é removida e a gramática se torna adequada para análise preditiva.
             </p>
           </div>
         </section>
@@ -204,8 +199,8 @@ export default function RemocaoRecursao() {
             <iframe
               width="100%"
               height="315"
-              src="https://www.youtube.com/embed/zY4w4_W30aQ?start=832"
-              title="Remoção de Recursão à Esquerda"
+              src="https://www.youtube.com/embed/zY4w4_W30aQ?start=1200"
+              title="Fatoração de Gramática"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -235,12 +230,12 @@ export default function RemocaoRecursao() {
 
             {/* Quadro 2: Área de texto editável */}
             <div className="grammar-card">
-              <h3>Gramática Transformada</h3>
+              <h3>Gramática Fatorada</h3>
               <div className="grammar-content">
                 <textarea
-                  value={gramaticaTransformada}
-                  onChange={(e) => setGramaticaTransformada(e.target.value)}
-                  placeholder="Escreva aqui a gramática sem recursão à esquerda..."
+                  value={gramaticaFatorada}
+                  onChange={(e) => setGramaticaFatorada(e.target.value)}
+                  placeholder="Escreva aqui a gramática fatorada..."
                   disabled={isInputDisabled}
                   className="grammar-textarea"
                 />

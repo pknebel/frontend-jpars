@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './styles.css';
 
-export default function RemocaoRecursao() {
+export default function FirstFollow() {
   const navigate = useNavigate();
   const location = useLocation();
   
   // Estados da aplicação
   const [selectedWorkflow, setSelectedWorkflow] = useState(null);
-  const [gramaticaTransformada, setGramaticaTransformada] = useState('');
+  const [firstSets, setFirstSets] = useState('');
+  const [followSets, setFollowSets] = useState('');
   const [isValidated, setIsValidated] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,16 +44,12 @@ export default function RemocaoRecursao() {
         const workflows = await response.json();
         console.log('Workflows recebidos:', workflows);
         
-        // Buscar um workflow que tenha recursão (possuiRecursao = true)
-        const workflowComRecursao = workflows.find(w => w.possuiRecursao === true);
-        
-        if (workflowComRecursao) {
-          setSelectedWorkflow(workflowComRecursao);
-          console.log('Workflow com recursão carregado:', workflowComRecursao);
-        } else {
-          // Se não encontrar nenhum com recursão, usar o primeiro
+        // Usar o primeiro workflow disponível
+        if (workflows.length > 0) {
           setSelectedWorkflow(workflows[0]);
-          console.log('Workflow padrão carregado:', workflows[0]);
+          console.log('Workflow carregado:', workflows[0]);
+        } else {
+          throw new Error('Nenhum workflow disponível');
         }
         
         setMessage('');
@@ -71,10 +68,10 @@ export default function RemocaoRecursao() {
     fetchSelectedWorkflow();
   }, []);
 
-  // Função para validar a gramática transformada
+  // Função para validar os conjuntos First e Follow
   const handleValidate = async () => {
-    if (!gramaticaTransformada.trim()) {
-      setMessage('Por favor, escreva a gramática transformada no campo à direita.');
+    if (!firstSets.trim() || !followSets.trim()) {
+      setMessage('Por favor, preencha ambos os campos de First e Follow.');
       setMessageType('error');
       return;
     }
@@ -85,12 +82,13 @@ export default function RemocaoRecursao() {
     try {
       const payload = {
         idWorkflow: selectedWorkflow.idWorkflow,
-        gramaticaEntrada: gramaticaTransformada.replace(/\r?\n/g, '\n')
+        firstSets: firstSets.replace(/\r?\n/g, '\\n'),
+        followSets: followSets.replace(/\r?\n/g, '\\n')
       };
 
       console.log('Enviando para validação:', payload);
 
-      const response = await fetch('http://localhost:8080/jpars/gramatica/validar-recursao', {
+      const response = await fetch('http://localhost:8080/jpars/gramatica/validar-first-follow', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -100,7 +98,7 @@ export default function RemocaoRecursao() {
 
       if (response.ok) {
         const result = await response.json();
-        setMessage('Gramática validada com sucesso');
+        setMessage('Conjuntos First e Follow validados com sucesso');
         setMessageType('success');
         setIsValidated(true);
         setIsInputDisabled(true);
@@ -110,7 +108,6 @@ export default function RemocaoRecursao() {
       }
     } catch (error) {
       console.error('Erro na validação:', error);
-      
       setMessage(`Erro: ${error.message}`);
       setMessageType('error');
     } finally {
@@ -121,22 +118,18 @@ export default function RemocaoRecursao() {
   // Função para navegar para a próxima tela
   const handleNext = () => {
     if (!isValidated) {
-      setMessage('Você deve validar a gramática primeiro');
+      setMessage('Você deve validar os conjuntos First e Follow primeiro');
       setMessageType('error');
       return;
     }
 
-    // Verificar se o workflow tem fatoração para decidir o próximo passo
-    if (selectedWorkflow.possuiFatoracao) {
-      navigate('/fatoracao-esquerda');
-    } else {
-      navigate('/calculo-first-follow');
-    }
+    // Redirecionar para a tela de Geração da Tabela Sintática (próxima etapa)
+    navigate('/geracao-tabela');
   };
 
   if (isLoading) {
     return (
-      <div className="remocao-recursao">
+      <div className="first-follow">
         <div className="loading">
           <div className="spinner"></div>
           <p>Carregando gramática...</p>
@@ -147,7 +140,7 @@ export default function RemocaoRecursao() {
 
   if (!selectedWorkflow) {
     return (
-      <div className="remocao-recursao">
+      <div className="first-follow">
         <div className="error">
           <h2>Erro</h2>
           <p>Não foi possível carregar a gramática.</p>
@@ -158,42 +151,50 @@ export default function RemocaoRecursao() {
   }
 
   return (
-    <div className="remocao-recursao">
+    <div className="first-follow">
       {/* Título da Tela */}
       <header className="header">
-        <h1>Remoção da Recursão à Esquerda</h1>
+        <h1>Cálculo de First e Follow</h1>
       </header>
 
       <main className="main-content">
-        {/* Explicação sobre Recursão à Esquerda */}
+        {/* Explicação sobre First e Follow */}
         <section className="info-section">
-          <h2>O que é Recursão à Esquerda</h2>
+          <h2>O que são os Conjuntos First e Follow</h2>
           <div className="info-box">
             <p>
-              Algumas gramáticas usam regras que se referem a si mesmas no início da produção, 
-              por exemplo <code>A → A a</code> — isso é chamado de recursão à esquerda. 
-              Como esse tipo de estrutura pode causar problemas em analisadores sintáticos, 
-              é necessário reescrevê-la para que não comece com o mesmo símbolo.
+              Os conjuntos <strong>First</strong> e <strong>Follow</strong> são fundamentais para a construção 
+              de analisadores sintáticos preditivos. Eles ajudam a determinar qual produção usar 
+              durante a análise.
             </p>
+            <ul>
+              <li><strong>First(A):</strong> Conjunto de terminais que podem iniciar cadeias derivadas de A</li>
+              <li><strong>Follow(A):</strong> Conjunto de terminais que podem aparecer imediatamente após A</li>
+            </ul>
           </div>
         </section>
 
-        {/* Explicação sobre como eliminar a recursão */}
+        {/* Explicação sobre como calcular */}
         <section className="info-section">
-          <h2>Como eliminar a recursão</h2>
+          <h2>Como calcular First e Follow</h2>
           <div className="info-box">
             <p>
-              Quando uma produção tem a forma: <code>A → Aα | β</code>, ela é recursiva à esquerda 
-              e precisa ser reescrita.
+              <strong>First(A):</strong>
             </p>
-            <p>A transformação consiste em:</p>
-            <div className="code-example">
-              <code>A → β A'</code><br />
-              <code>A' → α A' | ε</code>
-            </div>
+            <ul>
+              <li>Se A → aα, então a ∈ First(A)</li>
+              <li>Se A → ε, então ε ∈ First(A)</li>
+              <li>Se A → Bα, então First(B) ⊆ First(A)</li>
+            </ul>
+            
             <p>
-              Assim, a recursão é removida e a gramática se torna adequada para análise preditiva.
+              <strong>Follow(A):</strong>
             </p>
+            <ul>
+              <li>Se S é o símbolo inicial, então $ ∈ Follow(S)</li>
+              <li>Se A → αBβ, então First(β) - {'{ε}'} ⊆ Follow(B)</li>
+              <li>Se A → αB ou A → αBβ onde ε ∈ First(β), então Follow(A) ⊆ Follow(B)</li>
+            </ul>
           </div>
         </section>
 
@@ -204,8 +205,8 @@ export default function RemocaoRecursao() {
             <iframe
               width="100%"
               height="315"
-              src="https://www.youtube.com/embed/zY4w4_W30aQ?start=832"
-              title="Remoção de Recursão à Esquerda"
+              src="https://www.youtube.com/embed/zY4w4_W30aQ?start=1500"
+              title="Cálculo de First e Follow"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -215,34 +216,44 @@ export default function RemocaoRecursao() {
 
         {/* Área de prática */}
         <section className="practice-section">
-          <h2>Agora pratique com a gramática que escolheu:</h2>
+          <h2>Agora calcule os conjuntos First e Follow para a gramática:</h2>
           
-          <div className="practice-grid">
-            {/* Quadro 1: Gramática selecionada */}
-            <div className="grammar-card">
-              <h3>Gramática Original</h3>
-              <div className="grammar-content">
-                {selectedWorkflow.gramatica.split('\n').map((line, index) => (
-                  <div key={index} className="grammar-line">
-                    {line}
-                  </div>
-                ))}
+          <div className="grammar-display">
+            <h3>Gramática Original</h3>
+            <div className="grammar-content">
+              {selectedWorkflow.gramatica.split('\n').map((line, index) => (
+                <div key={index} className="grammar-line">
+                  {line}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="sets-grid">
+            {/* Conjunto First */}
+            <div className="set-card">
+              <h3>Conjunto First</h3>
+              <div className="set-content">
+                <textarea
+                  value={firstSets}
+                  onChange={(e) => setFirstSets(e.target.value)}
+                  placeholder="Digite aqui os conjuntos First..."
+                  disabled={isInputDisabled}
+                  className="set-textarea"
+                />
               </div>
             </div>
 
-            {/* Seta entre os quadros */}
-            <div className="arrow">→</div>
-
-            {/* Quadro 2: Área de texto editável */}
-            <div className="grammar-card">
-              <h3>Gramática Transformada</h3>
-              <div className="grammar-content">
+            {/* Conjunto Follow */}
+            <div className="set-card">
+              <h3>Conjunto Follow</h3>
+              <div className="set-content">
                 <textarea
-                  value={gramaticaTransformada}
-                  onChange={(e) => setGramaticaTransformada(e.target.value)}
-                  placeholder="Escreva aqui a gramática sem recursão à esquerda..."
+                  value={followSets}
+                  onChange={(e) => setFollowSets(e.target.value)}
+                  placeholder="Digite aqui os conjuntos Follow..."
                   disabled={isInputDisabled}
-                  className="grammar-textarea"
+                  className="set-textarea"
                 />
               </div>
             </div>

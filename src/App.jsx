@@ -22,10 +22,9 @@ function App() {
         <Route path='/calculo-first-follow' element={<FirstFollow />} />
         <Route path='/geracao-tabela' element={<GeracaoTabelaSintatica />} />
         <Route path='/adicao-recuperacao-erros' element={<RecuperacaoErros />} />
-        <Route path='validacao-sentenca' element={<ValidacaoSentenca />} />
+        <Route path='/validacao-sentenca' element={<ValidacaoSentenca />} />
         <Route path='/feedback' element={<Feedback />} />
         <Route path='/manual' element={<Manual />} />
-
       </Routes>
     </Router>
   );
