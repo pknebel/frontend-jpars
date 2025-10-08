@@ -5,7 +5,7 @@ import SelecaoGramaticas from './pages/SelecaoGramaticas';
 import Fatoracao from './pages/Fatoracao';
 import RemocaoRecursao from './pages/RemocaoRecursao';
 import FirstFollow from './pages/FirstFollow';
-import GeracaoTabelaSintatica from './pages/GeracaoTabelaSintatica';
+import GeracaoTabelaSintatica from './pages/GeracaoTabelaSintatica/index';
 import RecuperacaoErros from './pages/RecuperacaoErros';
 import ValidacaoSentenca from './pages/ValidacaoSentenca';
 import Feedback from './pages/Feedback';
