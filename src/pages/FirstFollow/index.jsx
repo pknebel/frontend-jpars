@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useGramatica } from '../../contexts/GramaticaContext';
 import './styles.css';
 
 export default function FirstFollow() {
   const navigate = useNavigate();
-  const location = useLocation();
+  const { gramaticaSelecionada, hasGramaticaSelecionada, idWorkflow } = useGramatica();
   
   // Estados da aplicação
   const [selectedWorkflow, setSelectedWorkflow] = useState(null);
+  const [ll1Grammar, setLl1Grammar] = useState('');
   const [firstSets, setFirstSets] = useState('');
   const [followSets, setFollowSets] = useState('');
   const [isValidated, setIsValidated] = useState(false);
@@ -17,47 +19,44 @@ export default function FirstFollow() {
   const [messageType, setMessageType] = useState(''); // 'success' ou 'error'
   const [isInputDisabled, setIsInputDisabled] = useState(false);
 
-  // Buscar o workflow selecionado ao carregar a página
+  // Carregar a gramática do contexto ao iniciar a página
   useEffect(() => {
-    const fetchSelectedWorkflow = async () => {
+    const loadGrammarFromContext = async () => {
       setIsLoading(true);
+      
+      // Verificar se há uma gramática selecionada no contexto
+      if (!hasGramaticaSelecionada() || !gramaticaSelecionada) {
+        console.log('Nenhuma gramática selecionada. Redirecionando para seleção...');
+        setMessage('Por favor, selecione uma gramática primeiro.');
+        setMessageType('error');
+        setTimeout(() => {
+          navigate('/selecao-gramatica');
+        }, 2000);
+        return;
+      }
+
       try {
-        console.log('Iniciando busca de workflows...');
+        console.log('Usando gramática do contexto:', gramaticaSelecionada);
+        setSelectedWorkflow(gramaticaSelecionada);
         
-        // Buscar todos os workflows
-        const response = await fetch('http://localhost:8080/jpars/workflow');
-        console.log('Resposta do servidor:', response.status, response.statusText);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        // Buscar a gramática LL(1) usando o ID do contexto
+        console.log(`Buscando gramática LL(1) para o workflow ID: ${idWorkflow}`);
+        const grammarResponse = await fetch(`http://localhost:8080/jpars/gramatica/ll1/${idWorkflow}`);
+
+        if (!grammarResponse.ok) {
+          throw new Error(`Erro ao buscar gramática LL(1): HTTP ${grammarResponse.status}: ${grammarResponse.statusText}`);
         }
-        
-        // Verificar se a resposta é realmente JSON
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          console.warn('Resposta não é JSON:', contentType);
-          const responseText = await response.text();
-          console.log('Conteúdo da resposta:', responseText.substring(0, 200));
-          throw new Error('Backend retornou HTML em vez de JSON. Verifique se o endpoint está funcionando.');
-        }
-        
-        const workflows = await response.json();
-        console.log('Workflows recebidos:', workflows);
-        
-        // Usar o primeiro workflow disponível
-        if (workflows.length > 0) {
-          setSelectedWorkflow(workflows[0]);
-          console.log('Workflow carregado:', workflows[0]);
-        } else {
-          throw new Error('Nenhum workflow disponível');
-        }
-        
+
+        const grammarText = await grammarResponse.text();
+        setLl1Grammar(grammarText);
+        console.log('Gramática LL(1) recebida:', grammarText);
+
         setMessage('');
         setMessageType('');
         
       } catch (error) {
-        console.error('Erro ao carregar workflow:', error);
-        setMessage('Erro ao carregar a gramática selecionada. Verifique se o backend está rodando.');
+        console.error('Erro ao carregar gramática:', error);
+        setMessage('Erro ao carregar a gramática LL(1). Verifique se o backend está rodando.');
         setMessageType('error');
         console.log('Detalhes do erro:', error.message);
       } finally {
@@ -65,8 +64,8 @@ export default function FirstFollow() {
       }
     };
 
-    fetchSelectedWorkflow();
-  }, []);
+    loadGrammarFromContext();
+  }, [gramaticaSelecionada, hasGramaticaSelecionada, idWorkflow, navigate]);
 
   // Função para validar os conjuntos First e Follow
   const handleValidate = async () => {
@@ -97,7 +96,7 @@ export default function FirstFollow() {
       });
 
       if (response.ok) {
-        const result = await response.json();
+        await response.json();
         setMessage('Conjuntos First e Follow validados com sucesso');
         setMessageType('success');
         setIsValidated(true);
@@ -219,9 +218,9 @@ export default function FirstFollow() {
           <h2>Agora calcule os conjuntos First e Follow para a gramática:</h2>
           
           <div className="grammar-display">
-            <h3>Gramática Original</h3>
+            <h3>Gramática LL(1)</h3>
             <div className="grammar-content">
-              {selectedWorkflow.gramatica.split('\n').map((line, index) => (
+              {ll1Grammar.split('\n').map((line, index) => (
                 <div key={index} className="grammar-line">
                   {line}
                 </div>

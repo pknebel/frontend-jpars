@@ -1,11 +1,8 @@
 .selecao-gramaticas {
   padding: 20px;
-  width: calc(100% - 420px);
-  margin-left: 400px;
-  margin-right: 20px;
+  max-width: 100%;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  position: relative;
-  left: 0;
+  box-sizing: border-box;
 }
 
 .header {
@@ -36,7 +33,7 @@
 .categories-container {
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 20px;
   width: 100%;
   position: relative;
   z-index: 1;
@@ -76,12 +73,17 @@
   margin: 0;
   font-size: 1.8rem;
   font-weight: 600;
+  display: flex;
+  align-items: center;
 }
 
 .toggle-icon {
   font-size: 1.5rem;
   font-weight: bold;
   transition: transform 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .workflow-count {
@@ -90,13 +92,15 @@
   border-radius: 20px;
   font-size: 0.9rem;
   font-weight: 500;
+  display: flex;
+  align-items: center;
 }
 
 .workflows-container {
-  padding: 25px;
+  padding: 15px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
+  gap: 10px;
   background: #f8f9fa;
   width: 100%;
 }
@@ -268,9 +272,6 @@
 @media (max-width: 768px) {
   .selecao-gramaticas {
     padding: 15px;
-    margin-left: 20px;
-    margin-right: 20px;
-    width: calc(100% - 40px);
   }
   
   .header h1 {

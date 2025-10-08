@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useGramatica } from '../../contexts/GramaticaContext';
+import HelpModal from '../../components/HelpModal';
 import './styles.css';
 
 export default function RemocaoRecursao() {
   const navigate = useNavigate();
-  const location = useLocation();
+  const { gramaticaSelecionada, hasGramaticaSelecionada, idWorkflow } = useGramatica();
   
   // Estados da aplicação
   const [selectedWorkflow, setSelectedWorkflow] = useState(null);
@@ -15,61 +17,78 @@ export default function RemocaoRecursao() {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState(''); // 'success' ou 'error'
   const [isInputDisabled, setIsInputDisabled] = useState(false);
+  
+  // Estados para controle de tentativas e modal de ajuda
+  const [tentativasIncorretas, setTentativasIncorretas] = useState(0);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [isLoadingAnswer, setIsLoadingAnswer] = useState(false);
 
-  // Buscar o workflow selecionado ao carregar a página
+  // Carregar a gramática do contexto ao iniciar a página
   useEffect(() => {
-    const fetchSelectedWorkflow = async () => {
-      setIsLoading(true);
-      try {
-        console.log('Iniciando busca de workflows...');
-        
-        // Buscar todos os workflows
-        const response = await fetch('http://localhost:8080/jpars/workflow');
-        console.log('Resposta do servidor:', response.status, response.statusText);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        // Verificar se a resposta é realmente JSON
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          console.warn('Resposta não é JSON:', contentType);
-          const responseText = await response.text();
-          console.log('Conteúdo da resposta:', responseText.substring(0, 200));
-          throw new Error('Backend retornou HTML em vez de JSON. Verifique se o endpoint está funcionando.');
-        }
-        
-        const workflows = await response.json();
-        console.log('Workflows recebidos:', workflows);
-        
-        // Buscar um workflow que tenha recursão (possuiRecursao = true)
-        const workflowComRecursao = workflows.find(w => w.possuiRecursao === true);
-        
-        if (workflowComRecursao) {
-          setSelectedWorkflow(workflowComRecursao);
-          console.log('Workflow com recursão carregado:', workflowComRecursao);
-        } else {
-          // Se não encontrar nenhum com recursão, usar o primeiro
-          setSelectedWorkflow(workflows[0]);
-          console.log('Workflow padrão carregado:', workflows[0]);
-        }
-        
-        setMessage('');
-        setMessageType('');
-        
-      } catch (error) {
-        console.error('Erro ao carregar workflow:', error);
-        setMessage('Erro ao carregar a gramática selecionada. Verifique se o backend está rodando.');
-        setMessageType('error');
-        console.log('Detalhes do erro:', error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    setIsLoading(true);
+    
+    // Verificar se há uma gramática selecionada no contexto
+    if (hasGramaticaSelecionada() && gramaticaSelecionada) {
+      console.log('Usando gramática do contexto:', gramaticaSelecionada);
+      setSelectedWorkflow(gramaticaSelecionada);
+      setMessage('');
+      setMessageType('');
+      setIsLoading(false);
+    } else {
+      // Se não há gramática no contexto, redirecionar para seleção
+      console.log('Nenhuma gramática selecionada. Redirecionando para seleção...');
+      setMessage('Por favor, selecione uma gramática primeiro.');
+      setMessageType('error');
+      setTimeout(() => {
+        navigate('/selecao-gramatica');
+      }, 2000);
+    }
+  }, [gramaticaSelecionada, hasGramaticaSelecionada, navigate]);
 
-    fetchSelectedWorkflow();
-  }, []);
+  // Função para buscar a resposta correta do backend
+  const buscarRespostaCorreta = async () => {
+    setIsLoadingAnswer(true);
+    try {
+      console.log(`Buscando resposta correta para gramática ID: ${idWorkflow}`);
+      const response = await fetch(`http://localhost:8080/jpars/gramatica/sem-recursao/${idWorkflow}`);
+      
+      if (!response.ok) {
+        throw new Error('Erro ao buscar resposta correta');
+      }
+      
+      const respostaCorreta = await response.text();
+      console.log('Resposta correta recebida:', respostaCorreta);
+      return respostaCorreta;
+    } catch (error) {
+      console.error('Erro ao buscar resposta:', error);
+      setMessage('Erro ao buscar a resposta correta. Tente novamente.');
+      setMessageType('error');
+      return null;
+    } finally {
+      setIsLoadingAnswer(false);
+    }
+  };
+
+  // Função para quando o usuário aceitar ver a resposta
+  const handleAcceptHelp = async () => {
+    setShowHelpModal(false);
+    const resposta = await buscarRespostaCorreta();
+    
+    if (resposta) {
+      setGramaticaTransformada(resposta);
+      setMessage('Resposta correta preenchida! Clique em "Validar" para continuar.');
+      setMessageType('success');
+      setTentativasIncorretas(0); // Resetar contador
+    }
+  };
+
+  // Função para quando o usuário rejeitar a ajuda
+  const handleRejectHelp = () => {
+    setShowHelpModal(false);
+    setMessage('Você tem mais 3 tentativas. Boa sorte!');
+    setMessageType('info');
+    setTentativasIncorretas(0); // Resetar contador para próximo ciclo
+  };
 
   // Função para validar a gramática transformada
   const handleValidate = async () => {
@@ -99,13 +118,26 @@ export default function RemocaoRecursao() {
       });
 
       if (response.ok) {
-        const result = await response.json();
+        await response.json();
         setMessage('Gramática validada com sucesso');
         setMessageType('success');
         setIsValidated(true);
         setIsInputDisabled(true);
+        setTentativasIncorretas(0); // Resetar contador em caso de sucesso
       } else {
         const errorData = await response.json();
+        
+        // Incrementar contador de tentativas incorretas
+        const novasTentativas = tentativasIncorretas + 1;
+        setTentativasIncorretas(novasTentativas);
+        
+        console.log(`Tentativa incorreta ${novasTentativas}/3`);
+        
+        // Verificar se atingiu 3 tentativas
+        if (novasTentativas >= 3) {
+          setShowHelpModal(true);
+        }
+        
         throw new Error(errorData.message || 'Erro na validação');
       }
     } catch (error) {
@@ -275,6 +307,22 @@ export default function RemocaoRecursao() {
           )}
         </section>
       </main>
+
+      {/* Modal de Ajuda */}
+      <HelpModal
+        isOpen={showHelpModal}
+        onAccept={handleAcceptHelp}
+        onReject={handleRejectHelp}
+        tentativas={3}
+      />
+
+      {/* Overlay de carregamento quando buscar resposta */}
+      {isLoadingAnswer && (
+        <div className="loading-overlay">
+          <div className="spinner"></div>
+          <p>Buscando resposta correta...</p>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useGramatica } from '../../contexts/GramaticaContext';
 import './styles.css';
 
 export const SelecaoGramaticas = () => {
   const navigate = useNavigate();
+  const { selecionarGramatica, gramaticaSelecionada } = useGramatica();
   const [workflows, setWorkflows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedWorkflow, setSelectedWorkflow] = useState(null);
+  const [selectedWorkflow, setSelectedWorkflow] = useState(gramaticaSelecionada);
   const [collapsedCategories, setCollapsedCategories] = useState({
     'Fácil': false,
     'Intermediário': false,
@@ -60,7 +62,10 @@ export const SelecaoGramaticas = () => {
   // Selecionar um workflow e redirecionar baseado nas propriedades
   const handleSelectWorkflow = (workflow) => {
     setSelectedWorkflow(workflow);
+    // Salvar a gramática no contexto global
+    selecionarGramatica(workflow);
     console.log('Workflow selecionado:', workflow);
+    console.log('ID da gramática armazenado:', workflow.idWorkflow);
     
     // Verificação de Recursão (prioridade máxima)
     if (workflow.possuiRecursao) {
