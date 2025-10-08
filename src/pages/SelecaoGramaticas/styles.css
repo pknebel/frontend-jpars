@@ -103,6 +103,8 @@
   gap: 10px;
   background: #f8f9fa;
   width: 100%;
+  justify-items: start;
+  align-items: start;
 }
 
 .workflow-card {

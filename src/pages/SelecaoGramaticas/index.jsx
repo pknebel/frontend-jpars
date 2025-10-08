@@ -124,7 +124,7 @@ export const SelecaoGramaticas = () => {
         <h1>Seleção da Gramática</h1>
         {selectedWorkflow && (
           <div className="selected-info">
-            <span>✓ Gramática selecionada: {selectedWorkflow.gramatica.split('\n')[0]}</span>
+            <span>Gramática selecionada: Gramática {selectedWorkflow.idWorkflow}</span>
             <div className="next-step-info">
               {selectedWorkflow.possuiRecursao ? (
                 <span>Próximo passo: Remoção de Recursão</span>
