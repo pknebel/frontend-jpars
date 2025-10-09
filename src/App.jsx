@@ -6,7 +6,7 @@ import Fatoracao from './pages/Fatoracao';
 import RemocaoRecursao from './pages/RemocaoRecursao';
 import FirstFollow from './pages/FirstFollow';
 import GeracaoTabelaSintatica from './pages/GeracaoTabelaSintatica/index';
-import RecuperacaoErros from './pages/RecuperacaoErros';
+import RecuperacaoErros from './pages/RecuperacaoErros/index';
 import ValidacaoSentenca from './pages/ValidacaoSentenca';
 import Feedback from './pages/Feedback';
 import Manual from './pages/Manual';

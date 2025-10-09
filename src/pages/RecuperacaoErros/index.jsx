@@ -4,21 +4,20 @@ import { useGramatica } from '../../contexts/GramaticaContext';
 import HelpModal from '../../components/HelpModal';
 import './styles.css';
 
-export default function GeracaoTabelaSintatica() {
+export default function RecuperacaoErros() {
   const navigate = useNavigate();
   const { gramaticaSelecionada, hasGramaticaSelecionada, idWorkflow } = useGramatica();
   
   // Estados da aplicação
   const [selectedWorkflow, setSelectedWorkflow] = useState(null);
   const [ll1Grammar, setLl1Grammar] = useState('');
-  const [firstFollowData, setFirstFollowData] = useState(null);
   const [tabelaSintaticaData, setTabelaSintaticaData] = useState(null);
   const [userInputs, setUserInputs] = useState({});
   const [isValidated, setIsValidated] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState(''); // 'success' ou 'error'
+  const [messageType, setMessageType] = useState(''); // 'success', 'error', 'info'
   const [isInputDisabled, setIsInputDisabled] = useState(false);
   
   // Estados para controle de tentativas e modal de ajuda
@@ -58,19 +57,7 @@ export default function GeracaoTabelaSintatica() {
         setLl1Grammar(grammarText);
         console.log('Gramática LL(1) recebida:', grammarText);
 
-        // Buscar conjuntos FIRST e FOLLOW
-        console.log(`Buscando conjuntos FIRST/FOLLOW para o workflow ID: ${idWorkflow}`);
-        const firstFollowResponse = await fetch(`http://localhost:8080/jpars/first-follow/${idWorkflow}`);
-
-        if (!firstFollowResponse.ok) {
-          throw new Error(`Erro ao buscar FIRST/FOLLOW: HTTP ${firstFollowResponse.status}`);
-        }
-
-        const firstFollowJson = await firstFollowResponse.json();
-        setFirstFollowData(firstFollowJson);
-        console.log('FIRST/FOLLOW recebido:', firstFollowJson);
-
-        // Buscar estrutura da tabela sintática (sem preencher as respostas)
+        // Buscar tabela sintática (para exibição)
         console.log(`Buscando tabela sintática para o workflow ID: ${idWorkflow}`);
         const tabelaResponse = await fetch(`http://localhost:8080/jpars/tabela-sintatica/${idWorkflow}`);
 
@@ -82,20 +69,19 @@ export default function GeracaoTabelaSintatica() {
         setTabelaSintaticaData(tabelaJson);
         console.log('Tabela sintática recebida:', tabelaJson);
         
-        // Inicializar os inputs do usuário vazios
+        // Inicializar os inputs do usuário vazios apenas para células sem produção
         const initialInputs = {};
         if (tabelaJson.rows && Array.isArray(tabelaJson.rows)) {
           tabelaJson.rows.forEach(row => {
-            console.log(`Processando linha ${row.index} (${row.naoTerminal}):`, row);
             row.columns.forEach(col => {
               const key = `${row.index}-${col.index}`;
+              // Inicializar como vazio (o usuário pode adicionar Sync se necessário)
               initialInputs[key] = '';
-              console.log(`  -> Criando input key: ${key} (terminal: ${col.terminal})`);
             });
           });
         }
         setUserInputs(initialInputs);
-        console.log('Inputs inicializados (total de', Object.keys(initialInputs).length, 'inputs):', initialInputs);
+        console.log('Inputs inicializados:', initialInputs);
 
         setMessage('');
         setMessageType('');
@@ -112,13 +98,36 @@ export default function GeracaoTabelaSintatica() {
     loadData();
   }, [gramaticaSelecionada, hasGramaticaSelecionada, idWorkflow, navigate]);
 
-  // Função para atualizar os inputs do usuário
-  const handleInputChange = (rowIndex, colIndex, value) => {
+  // Função para verificar se uma célula tem produção original (não editável)
+  const getCellProducao = (rowIndex, colIndex) => {
+    if (!tabelaSintaticaData || !tabelaSintaticaData.rows) return null;
+    
+    const row = tabelaSintaticaData.rows.find(r => r.index === rowIndex);
+    if (!row) return null;
+    
+    const col = row.columns.find(c => c.index === colIndex);
+    if (!col || !col.producao || !col.producao.naoTerminal) return null;
+    
+    return col.producao;
+  };
+
+  // Função para alternar entre vazio e "Sync" ao clicar na célula
+  const handleCellClick = (rowIndex, colIndex) => {
+    if (isInputDisabled) return; // Não permite alteração após validação
+    
+    // Verificar se a célula tem produção original (não é editável)
+    const producao = getCellProducao(rowIndex, colIndex);
+    if (producao) return; // Células com produção não são editáveis
+    
     const key = `${rowIndex}-${colIndex}`;
-    console.log(`Alterando input - Row: ${rowIndex}, Col: ${colIndex}, Key: ${key}, Value: ${value}`);
+    const currentValue = userInputs[key] || '';
+    const newValue = currentValue === 'Sync' ? '' : 'Sync';
+    
+    console.log(`Toggle célula - Row: ${rowIndex}, Col: ${colIndex}, Key: ${key}, Valor anterior: "${currentValue}", Novo valor: "${newValue}"`);
+    
     setUserInputs(prev => ({
       ...prev,
-      [key]: value
+      [key]: newValue
     }));
   };
 
@@ -130,23 +139,29 @@ export default function GeracaoTabelaSintatica() {
     return `${producao.naoTerminal} = ${producao.elementosTransicao.join(' ')}`;
   };
 
-  // Função para buscar a resposta correta do backend
+  // Função para buscar a resposta correta do backend (tabela sintática completa)
   const buscarRespostaCorreta = async () => {
     setIsLoadingAnswer(true);
     try {
-      console.log(`Buscando resposta correta para o workflow ID: ${idWorkflow}`);
+      console.log(`Buscando tabela sintática correta para o workflow ID: ${idWorkflow}`);
+      
+      // Buscar a tabela sintática completa
       const response = await fetch(`http://localhost:8080/jpars/tabela-sintatica/${idWorkflow}`);
       
+      console.log(`Response status: ${response.status}`);
+      console.log(`Response ok: ${response.ok}`);
+      
       if (!response.ok) {
-        throw new Error('Erro ao buscar resposta correta');
+        throw new Error(`Erro ao buscar tabela sintática: HTTP ${response.status}`);
       }
       
       const respostaCorreta = await response.json();
-      console.log('Resposta correta recebida:', respostaCorreta);
+      console.log('Tabela sintática recebida:', respostaCorreta);
+      console.log('Estrutura da resposta:', JSON.stringify(respostaCorreta, null, 2));
       return respostaCorreta;
     } catch (error) {
-      console.error('Erro ao buscar resposta:', error);
-      setMessage('Erro ao buscar a resposta correta. Tente novamente.');
+      console.error('Erro detalhado ao buscar resposta:', error);
+      setMessage(`Erro ao buscar a resposta correta: ${error.message}`);
       setMessageType('error');
       return null;
     } finally {
@@ -160,23 +175,60 @@ export default function GeracaoTabelaSintatica() {
     const resposta = await buscarRespostaCorreta();
     
     if (resposta && resposta.rows) {
-      // Preencher os campos com a resposta correta
+      console.log('Processando tabela sintática correta...');
+      console.log('Total de linhas na resposta:', resposta.rows.length);
+      
+      // Percorrer o JSON retornado e identificar onde o backend colocou os Syncs
       const newInputs = {};
-      resposta.rows.forEach(row => {
-        row.columns.forEach(col => {
+      resposta.rows.forEach((row, rowIdx) => {
+        console.log(`Processando linha ${rowIdx}: ${row.naoTerminal}`);
+        row.columns.forEach((col, colIdx) => {
           const key = `${row.index}-${col.index}`;
-          // Ignorar sync - apenas preencher produções
-          if (col.producao && col.producao.naoTerminal) {
-            newInputs[key] = formatProducao(col.producao);
-          } else {
+          
+          // Verificar se essa célula tem uma produção na tabela original (não editável)
+          const producaoOriginal = getCellProducao(row.index, col.index);
+          
+          if (producaoOriginal) {
+            // Célula tem produção original da tabela sintática (não editável)
+            console.log(`  Célula [${row.index},${col.index}]: Produção original (não editável)`);
             newInputs[key] = '';
+          } else {
+            // Célula vazia na tabela original - verificar se o backend retornou "Sync"
+            let valorCelula = '';
+            
+            // Verificar diferentes formas que o backend pode retornar "Sync"
+            if (col.producao && col.producao.naoTerminal) {
+              const producaoText = formatProducao(col.producao);
+              console.log(`  Célula [${row.index},${col.index}]: Produção retornada = "${producaoText}"`);
+              
+              // Se a produção formatada é exatamente "Sync", marcar
+              if (producaoText === 'Sync' || producaoText.trim().toLowerCase() === 'sync') {
+                valorCelula = 'Sync';
+                console.log(`    -> É Sync! Marcando.`);
+              }
+            } else if (col.sync === true || col.sync === 'Sync' || col.sync === 'sync') {
+              // Verificar se existe um campo "sync" direto
+              console.log(`  Célula [${row.index},${col.index}]: Campo sync = ${col.sync}`);
+              valorCelula = 'Sync';
+              console.log(`    -> Marcando como Sync.`);
+            } else {
+              console.log(`  Célula [${row.index},${col.index}]: Vazia (sem Sync)`);
+            }
+            
+            newInputs[key] = valorCelula;
           }
         });
       });
+      
+      console.log('Inputs finais após processamento:', newInputs);
       setUserInputs(newInputs);
       setMessage('Resposta correta preenchida! Clique em "Validar" para continuar.');
       setMessageType('success');
-      setTentativasIncorretas(0); // Resetar contador
+      setTentativasIncorretas(0);
+    } else {
+      console.error('Resposta inválida ou sem rows:', resposta);
+      setMessage('Erro ao processar a resposta do servidor.');
+      setMessageType('error');
     }
   };
 
@@ -185,10 +237,10 @@ export default function GeracaoTabelaSintatica() {
     setShowHelpModal(false);
     setMessage('Você tem mais 3 tentativas. Boa sorte!');
     setMessageType('info');
-    setTentativasIncorretas(0); // Resetar contador para próximo ciclo
+    setTentativasIncorretas(0);
   };
 
-  // Função para validar a tabela sintática
+  // Função para validar a recuperação de erros
   const handleValidate = async () => {
     setIsValidating(true);
     setMessage('');
@@ -201,10 +253,21 @@ export default function GeracaoTabelaSintatica() {
         tabelaSintaticaData.rows.forEach(row => {
           row.columns.forEach(col => {
             const key = `${row.index}-${col.index}`;
+            const producao = getCellProducao(row.index, col.index);
+            
+            // Se tem produção, enviar a produção formatada
+            // Se não tem produção, enviar o valor do input (vazio ou "Sync")
+            let value = '';
+            if (producao) {
+              value = formatProducao(producao);
+            } else {
+              value = userInputs[key] || '';
+            }
+            
             values.push({
               rowIndex: row.index,
               columnIndex: col.index,
-              value: userInputs[key] || ''
+              value: value
             });
           });
         });
@@ -217,7 +280,7 @@ export default function GeracaoTabelaSintatica() {
 
       console.log('Enviando para validação:', payload);
 
-      const response = await fetch('http://localhost:8080/jpars/tabela-sintatica/validar', {
+      const response = await fetch('http://localhost:8080/jpars/tabela-sintatica/validar-sync', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -227,11 +290,11 @@ export default function GeracaoTabelaSintatica() {
 
       if (response.ok) {
         await response.json();
-        setMessage('Tabela sintática validada com sucesso!');
+        setMessage('Recuperação de erros validada com sucesso!');
         setMessageType('success');
         setIsValidated(true);
         setIsInputDisabled(true);
-        setTentativasIncorretas(0); // Resetar contador em caso de sucesso
+        setTentativasIncorretas(0);
       } else {
         const errorData = await response.json();
         
@@ -260,18 +323,18 @@ export default function GeracaoTabelaSintatica() {
   // Função para navegar para a próxima tela
   const handleNext = () => {
     if (!isValidated) {
-      setMessage('Você deve validar a tabela sintática primeiro');
+      setMessage('Você deve validar a recuperação de erros primeiro');
       setMessageType('error');
       return;
     }
 
-    // Redirecionar para a próxima tela (recuperação de erros)
-    navigate('/adicao-recuperacao-erros');
+    // Redirecionar para a próxima tela (validação de sentença)
+    navigate('/validacao-sentenca');
   };
 
   if (isLoading) {
     return (
-      <div className="geracao-tabela-sintatica">
+      <div className="recuperacao-erros">
         <div className="loading">
           <div className="spinner"></div>
           <p>Carregando dados...</p>
@@ -282,7 +345,7 @@ export default function GeracaoTabelaSintatica() {
 
   if (!selectedWorkflow) {
     return (
-      <div className="geracao-tabela-sintatica">
+      <div className="recuperacao-erros">
         <div className="error">
           <h2>Erro</h2>
           <p>Não foi possível carregar a gramática.</p>
@@ -296,63 +359,69 @@ export default function GeracaoTabelaSintatica() {
   const terminais = tabelaSintaticaData?.rows?.[0]?.columns?.map(col => col.terminal) || [];
 
   return (
-    <div className="geracao-tabela-sintatica">
+    <div className="recuperacao-erros">
       {/* Título da Tela */}
       <header className="header">
-        <h1>Geração da Tabela Sintática</h1>
+        <h1>Adição de Recuperação de Erros</h1>
       </header>
 
       <main className="main-content">
-        {/* Explicação sobre Tabela Sintática */}
+        {/* Explicação sobre Recuperação de Erros */}
         <section className="info-section">
-          <h2>O que é a Tabela Sintática</h2>
+          <h2>O que é Recuperação de Erros</h2>
           <div className="info-box">
             <p>
-              A <strong>Tabela Sintática</strong> (ou Tabela de Análise Preditiva) é uma estrutura 
-              fundamental para analisadores sintáticos do tipo LL(1). Ela determina qual produção 
-              da gramática deve ser aplicada com base no não-terminal atual e no próximo símbolo 
-              de entrada (lookahead).
+              A <strong>Recuperação de Erros</strong> é um mecanismo essencial em analisadores sintáticos 
+              que permite ao parser continuar a análise mesmo após detectar erros sintáticos. Isso é 
+              fundamental para fornecer múltiplas mensagens de erro em uma única passada pelo código fonte.
             </p>
             <ul>
               <li>
-                <strong>Linhas:</strong> Representam os não-terminais da gramática
+                <strong>Modo Pânico:</strong> Descarta símbolos de entrada até encontrar um símbolo de 
+                sincronização (geralmente delimitadores como ; , $ )
               </li>
               <li>
-                <strong>Colunas:</strong> Representam os terminais da gramática (incluindo $)
+                <strong>Sincronização:</strong> Define pontos na gramática onde o parser pode retomar 
+                a análise após um erro
               </li>
               <li>
-                <strong>Células:</strong> Contêm as produções a serem aplicadas ou ficam vazias 
-                (indicando erro sintático)
+                <strong>Follow Set:</strong> Os conjuntos FOLLOW são frequentemente usados para determinar 
+                pontos de sincronização apropriados
               </li>
             </ul>
           </div>
         </section>
 
-        {/* Explicação sobre como gerar */}
+        {/* Explicação sobre como adicionar */}
         <section className="info-section">
-          <h2>Como gerar a Tabela Sintática</h2>
+          <h2>Como adicionar Recuperação de Erros</h2>
           <div className="info-box">
             <p>
-              Para cada produção <code>A → α</code> da gramática:
+              Para adicionar recuperação de erros à tabela sintática, você deve marcar as células 
+              vazias (erros) com <code>Sync</code> nos seguintes casos:
             </p>
             <ol>
               <li>
-                Para cada terminal <code>a</code> em <strong>First(α)</strong>, adicione 
-                <code>A → α</code> na célula <code>M[A, a]</code>
+                Se o terminal está no conjunto <strong>FOLLOW</strong> do não-terminal, marque como 
+                <code>Sync</code> clicando na célula vazia
               </li>
               <li>
-                Se <code>ε</code> está em <strong>First(α)</strong>, então para cada terminal 
-                <code>b</code> em <strong>Follow(A)</strong>, adicione <code>A → α</code> na 
-                célula <code>M[A, b]</code>
+                <strong>Clique em uma célula vazia</strong> para adicionar "Sync"
               </li>
               <li>
-                Se <code>ε</code> está em <strong>First(α)</strong> e <code>$</code> está em 
-                <strong>Follow(A)</strong>, adicione <code>A → α</code> na célula <code>M[A, $]</code>
+                <strong>Clique em uma célula com "Sync"</strong> para removê-lo e voltar ao estado vazio
+              </li>
+              <li>
+                Isso permite que o parser "sincronize" quando encontrar um erro, pulando para um 
+                ponto seguro na análise
+              </li>
+              <li>
+                As células que não são sincronização permanecem vazias, indicando erros sem recuperação
               </li>
             </ol>
             <p style={{ marginTop: '15px' }}>
-              <strong>Observação:</strong> Todas as células não preenchidas representam 
-              erros sintáticos. Uma gramática é LL(1) se nenhuma célula contém mais de uma produção.
+              <strong>Importante:</strong> Adicione <code>Sync</code> apenas onde o terminal pertence 
+              ao FOLLOW do não-terminal correspondente. Isso garante uma recuperação apropriada.
             </p>
           </div>
         </section>
@@ -364,8 +433,8 @@ export default function GeracaoTabelaSintatica() {
             <iframe
               width="100%"
               height="315"
-              src="https://www.youtube.com/embed/zY4w4_W30aQ?start=1500"
-              title="Geração da Tabela Sintática"
+              src="https://www.youtube.com/embed/zY4w4_W30aQ?start=1800"
+              title="Recuperação de Erros"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -375,7 +444,7 @@ export default function GeracaoTabelaSintatica() {
 
         {/* Área de prática */}
         <section className="practice-section">
-          <h2>Agora construa a tabela sintática para a gramática:</h2>
+          <h2>Adicione recuperação de erros à tabela sintática:</h2>
           
           {/* Gramática LL(1) */}
           <div className="grammar-display">
@@ -389,35 +458,10 @@ export default function GeracaoTabelaSintatica() {
             </div>
           </div>
 
-          {/* Tabela FIRST e FOLLOW */}
-          {firstFollowData && firstFollowData.rows && (
-            <div className="first-follow-display">
-              <h3>Conjuntos FIRST e FOLLOW</h3>
-              <table className="first-follow-table">
-                <thead>
-                  <tr>
-                    <th>Não-Terminal</th>
-                    <th>FIRST</th>
-                    <th>FOLLOW</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {firstFollowData.rows.map((row, index) => (
-                    <tr key={index}>
-                      <td className="non-terminal">{row.naoTerminal}</td>
-                      <td className="first-set">{row.first}</td>
-                      <td className="follow-set">{row.follow}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* Tabela Sintática Editável */}
+          {/* Tabela Sintática com Recuperação de Erros */}
           {tabelaSintaticaData && tabelaSintaticaData.rows && (
             <div className="tabela-sintatica-container">
-              <h3>Preencha a Tabela Sintática</h3>
+              <h3>Tabela Sintática - Clique nas células vazias para adicionar "Sync"</h3>
               <div className="table-wrapper">
                 <table className="tabela-sintatica">
                   <thead>
@@ -436,16 +480,35 @@ export default function GeracaoTabelaSintatica() {
                         <td className="non-terminal-cell">{row.naoTerminal}</td>
                         {row.columns.map((col) => {
                           const key = `${row.index}-${col.index}`;
+                          const producao = getCellProducao(row.index, col.index);
+                          const hasProducao = !!producao;
+                          
+                          // Se tem produção, exibir a produção (não editável)
+                          if (hasProducao) {
+                            const producaoText = formatProducao(producao);
+                            return (
+                              <td 
+                                key={`cell-${row.index}-${col.index}`} 
+                                className="filled-cell"
+                                title="Célula preenchida (não editável)"
+                              >
+                                {producaoText}
+                              </td>
+                            );
+                          }
+                          
+                          // Caso contrário, permitir toggle de Sync
+                          const cellValue = userInputs[key] || '';
+                          const hasSync = cellValue === 'Sync';
+                          
                           return (
-                            <td key={`cell-${row.index}-${col.index}`} className="input-cell">
-                              <input
-                                type="text"
-                                value={userInputs[key] || ''}
-                                onChange={(e) => handleInputChange(row.index, col.index, e.target.value)}
-                                placeholder=""
-                                disabled={isInputDisabled}
-                                className="table-input"
-                              />
+                            <td 
+                              key={`cell-${row.index}-${col.index}`} 
+                              className={`clickable-cell ${hasSync ? 'has-sync' : 'empty-cell'} ${isInputDisabled ? 'disabled' : ''}`}
+                              onClick={() => handleCellClick(row.index, col.index)}
+                              title={isInputDisabled ? '' : (hasSync ? 'Clique para remover Sync' : 'Clique para adicionar Sync')}
+                            >
+                              {cellValue}
                             </td>
                           );
                         })}
