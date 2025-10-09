@@ -81,11 +81,6 @@ export const SidebarData = [
         iconOpened: <FaIcons.FaAngleUp />,
         subNav:[
             {
-                title: 'Feedback da Ferramenta',
-                path: '/feedback',
-                icon: <AiIcons.AiFillStar />,
-            },
-            {
                 title: 'Manual do Usuário',
                 path: '/manual',
                 icon: <HiIcons.HiOutlineClipboardList />,
