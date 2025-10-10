@@ -14,10 +14,11 @@ import styled from 'styled-components';
 import { GramaticaProvider } from './contexts/GramaticaContext';
 
 const MainContent = styled.div`
-  margin-left: 400px;
-  margin-top: 80px;
-  padding: 20px;
-  min-height: calc(100vh - 80px);
+  margin-left: var(--sidebar-width);
+  margin-top: var(--navbar-height);
+  padding: var(--spacing-6);
+  min-height: calc(100vh - var(--navbar-height));
+  background: var(--bg-secondary);
 `;
 
 function App() {

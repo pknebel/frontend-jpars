@@ -4,42 +4,49 @@ import styled from 'styled-components'
 
 const SidebarLink = styled(Link)`
     display: flex;
-    color: #000000ff;
+    color: var(--text-primary);
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
+    padding: var(--spacing-4) var(--spacing-5);
     list-style: none;
-    height: 60px;
+    height: auto;
+    min-height: 56px;
     text-decoration: none;
-    font-size: 18px;
-    background: ${({ isActive }) => (isActive ? '#004aad' : 'transparent')};
-    color: ${({ isActive }) => (isActive ? '#ffffff' : '#000000ff')};
-    border-left: ${({ isActive }) => (isActive ? '4px solid #002d6b' : '4px solid transparent')};
+    font-size: var(--font-size-base);
+    font-weight: ${({ isActive }) => (isActive ? 'var(--font-weight-semibold)' : 'var(--font-weight-regular)')};
+    background: ${({ isActive }) => (isActive ? 'var(--bg-active)' : 'transparent')};
+    color: ${({ isActive }) => (isActive ? 'var(--color-primary-700)' : 'var(--text-primary)')};
+    border-left: ${({ isActive }) => (isActive ? '4px solid var(--color-primary-600)' : '4px solid transparent')};
+    transition: all var(--transition-base);
 
     &:hover {
-        background: ${({ isActive }) => (isActive ? '#004aad' : '#e6e6e6ff')};
-        border-left: 4px solid ${({ isActive }) => (isActive ? '#002d6b' : '#004aad')};
+        background: ${({ isActive }) => (isActive ? 'var(--bg-active)' : 'var(--bg-hover)')};
+        border-left: 4px solid ${({ isActive }) => (isActive ? 'var(--color-primary-600)' : 'var(--color-primary-300)')};
         cursor: pointer;
     }
 `;
 
 const SidebarLabel = styled.span`
-    margin-left: 16px;
+    margin-left: var(--spacing-3);
 `;
 
 const DropdownLink = styled(Link)`
-    background: ${({ isActive }) => (isActive ? '#004aad' : '#e6e6e6ff')};
-    color: ${({ isActive }) => (isActive ? '#ffffff' : '#000000ff')};
-    height: 60px;
-    padding-left: 3rem;
+    background: ${({ isActive }) => (isActive ? 'var(--bg-active)' : 'var(--bg-secondary)')};
+    color: ${({ isActive }) => (isActive ? 'var(--color-primary-700)' : 'var(--text-primary)')};
+    height: auto;
+    min-height: 48px;
+    padding: var(--spacing-3) var(--spacing-5);
+    padding-left: var(--spacing-12);
     display: flex;
     align-items: center;
-    font-size: 18px;
+    font-size: var(--font-size-sm);
+    font-weight: ${({ isActive }) => (isActive ? 'var(--font-weight-semibold)' : 'var(--font-weight-regular)')};
     text-decoration: none;
-    border-left: ${({ isActive }) => (isActive ? '4px solid #002d6b' : '4px solid transparent')};
+    border-left: ${({ isActive }) => (isActive ? '4px solid var(--color-primary-600)' : '4px solid transparent')};
+    transition: all var(--transition-base);
 
     &:hover {
-        background: ${({ isActive }) => (isActive ? '#004aad' : '#d0d0d0')};
+        background: ${({ isActive }) => (isActive ? 'var(--bg-active)' : 'var(--bg-hover)')};
         cursor: pointer;
     }
 `;

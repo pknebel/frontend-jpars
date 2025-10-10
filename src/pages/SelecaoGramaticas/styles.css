@@ -1,234 +1,268 @@
+/* Seleção de Gramáticas - Baseado na Landing Page */
 .selecao-gramaticas {
-  padding: 20px;
-  max-width: 100%;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  box-sizing: border-box;
+  min-height: 100vh;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  font-family: var(--font-family-primary);
 }
 
+/* Header */
 .header {
+  max-width: 1200px;
+  margin: 0 auto 60px auto;
   text-align: center;
-  margin-bottom: 30px;
-  padding: 20px;
-  background: #c7c7c9ff;
-  color: #2c3e50;
-  border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  width: 100%;
+  padding: 40px 20px;
+  background: white !important;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .header h1 {
-  margin: 0 0 15px 0;
-  font-size: 2.5rem;
-  font-weight: 300;
+  margin: 0 0 20px 0;
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #004aad;
 }
 
 .selected-info {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 10px 20px;
+  display: inline-block;
+  background: rgba(0, 74, 173, 0.1);
+  padding: 12px 24px;
   border-radius: 25px;
   font-size: 1.1rem;
-  backdrop-filter: blur(10px);
+  font-weight: 500;
+  color: #004aad;
+  border: 1px solid rgba(0, 74, 173, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 74, 173, 0.1);
 }
 
+.next-step-info {
+  margin-top: 8px;
+  font-size: 0.95rem;
+  color: #666;
+}
+
+/* Categories Container */
 .categories-container {
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  width: 100%;
-  position: relative;
-  z-index: 1;
+  gap: 30px;
 }
 
+/* Category Lane */
 .category-lane {
   background: white;
-  border-radius: 15px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: all 0.3s ease;
+  animation: fadeInUp 0.5s ease-out;
 }
 
 .category-lane:hover {
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12);
-  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
 }
 
+/* Category Header */
 .category-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  padding: 20px 25px;
-  background: #c7c7c9ff;
-  color: #2c3e50;
+  gap: 20px;
+  padding: 24px 32px;
+  background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
+  color: white;
   cursor: pointer;
   transition: all 0.3s ease;
   user-select: none;
+  min-height: 80px;
 }
 
 .category-header:hover {
-  background: #c7c7c9ff;
-  opacity: 0.9;
+  background: linear-gradient(135deg, #003d8f 0%, #0052a3 100%);
 }
 
 .category-header h2 {
   margin: 0;
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: 600;
   display: flex;
   align-items: center;
+  letter-spacing: 1px;
+  color: white;
+  justify-self: start;
 }
 
 .toggle-icon {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-weight: bold;
   transition: transform 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  justify-self: center;
 }
 
 .workflow-count {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.25);
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-size: 1rem;
   font-weight: 500;
   display: flex;
   align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  justify-self: end;
 }
 
+/* Workflows Container */
 .workflows-container {
-  padding: 15px;
+  padding: 30px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
   background: #f8f9fa;
-  width: 100%;
-  justify-items: start;
-  align-items: start;
 }
 
+/* Workflow Card */
 .workflow-card {
   background: white;
   border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   border: 2px solid transparent;
-  width: fit-content;
-  min-width: 280px;
+  display: flex;
+  flex-direction: column;
 }
 
 .workflow-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  border-color: #e3f2fd;
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 74, 173, 0.2);
+  border-color: #004aad;
 }
 
+/* Gramática Content */
 .gramatica-content h3 {
-  margin: 0 0 15px 0;
-  color: #333;
-  font-size: 1.3rem;
+  margin: 0 0 16px 0;
+  color: #004aad;
+  font-size: 1.4rem;
   font-weight: 600;
+  text-align: center;
 }
 
 .gramatica-text {
-  background: #f5f5f5;
-  padding: 15px;
+  background: #f8f9fa;
+  padding: 16px;
   border-radius: 8px;
-  margin-bottom: 15px;
-  border-left: 4px solid #c7c7c9ff;
+  margin-bottom: 16px;
+  border-left: 4px solid #004aad;
+  min-height: 120px;
 }
 
 .gramatica-linha {
   font-family: 'Courier New', monospace;
   font-size: 0.95rem;
   color: #2c3e50;
-  line-height: 1.6;
-  margin-bottom: 5px;
+  line-height: 1.7;
+  margin-bottom: 6px;
 }
 
 .gramatica-linha:last-child {
   margin-bottom: 0;
 }
 
+/* Workflow Properties */
 .workflow-properties {
   display: flex;
-  gap: 15px;
+  gap: 12px;
   margin-bottom: 20px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .property {
-  padding: 6px 12px;
-  border-radius: 15px;
+  padding: 8px 16px;
+  border-radius: 20px;
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  transition: all 0.2s ease;
 }
 
 .property.true {
-  background: #e8f5e8;
+  background: #e8f5e9;
   color: #2e7d32;
-  border: 1px solid #a5d6a7;
+  border: 2px solid #81c784;
 }
 
 .property.false {
   background: #ffebee;
   color: #c62828;
-  border: 1px solid #ef9a9a;
+  border: 2px solid #ef9a9a;
 }
 
+/* Select Button */
 .select-button {
   width: 100%;
-  padding: 12px 20px;
-  background: #c7c7c9ff;
-  color: #2c3e50;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
+  color: white;
   border: none;
   border-radius: 8px;
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 1px;
+  box-shadow: 0 4px 12px rgba(0, 74, 173, 0.3);
+  margin-top: auto;
 }
 
 .select-button:hover {
-  background: #2e7d32;
+  background: linear-gradient(135deg, #003d8f 0%, #0052a3 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(46, 125, 50, 0.4);
+  box-shadow: 0 6px 16px rgba(0, 74, 173, 0.4);
 }
 
 .select-button:active {
   transform: translateY(0);
 }
 
+/* No Workflows */
 .no-workflows {
   grid-column: 1 / -1;
   text-align: center;
-  padding: 40px;
+  padding: 60px 20px;
   color: #666;
+  font-size: 1.2rem;
   font-style: italic;
 }
 
+/* Loading State */
 .loading {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
+  min-height: 60vh;
   text-align: center;
 }
 
 .spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #c7c7c9ff;
+  width: 60px;
+  height: 60px;
+  border: 5px solid rgba(0, 74, 173, 0.2);
+  border-top: 5px solid #004aad;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 @keyframes spin {
@@ -237,88 +271,160 @@
 }
 
 .loading p {
-  font-size: 1.2rem;
-  color: #666;
+  font-size: 1.3rem;
+  color: #004aad;
   margin: 0;
+  font-weight: 500;
 }
 
+/* Error State */
 .error {
+  max-width: 600px;
+  margin: 60px auto;
   text-align: center;
-  padding: 40px 20px;
-  color: #d32f2f;
+  padding: 40px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .error h2 {
-  margin-bottom: 15px;
-  color: #d32f2f;
+  margin-bottom: 16px;
+  color: #c62828;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.error p {
+  color: #666;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 24px;
 }
 
 .error button {
-  margin-top: 20px;
-  padding: 12px 24px;
-  background: #c7c7c9ff;
-  color: #2c3e50;
+  padding: 14px 32px;
+  background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
+  color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 1rem;
-  transition: background 0.3s ease;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 74, 173, 0.3);
 }
 
 .error button:hover {
-  background: #c7c7c9ff;
-  opacity: 0.9;
+  background: linear-gradient(135deg, #003d8f 0%, #0052a3 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 74, 173, 0.4);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Responsividade */
 @media (max-width: 768px) {
   .selecao-gramaticas {
-    padding: 15px;
+    padding: 20px 15px;
   }
   
+  .header {
+    margin-bottom: 40px;
+    padding: 30px 20px;
+  }
+
   .header h1 {
-    font-size: 2rem;
+    font-size: 2.2rem;
   }
   
   .category-header {
-    padding: 15px 20px;
+    grid-template-columns: 1fr;
+    padding: 20px 24px;
+    gap: 12px;
+    text-align: center;
   }
-  
+
   .category-header h2 {
-    font-size: 1.5rem;
+    justify-self: center;
+    font-size: 1.6rem;
+  }
+
+  .toggle-icon {
+    order: -1;
+  }
+
+  .workflow-count {
+    justify-self: center;
   }
   
   .workflows-container {
     grid-template-columns: 1fr;
     padding: 20px;
+    gap: 20px;
   }
   
   .workflow-card {
-    padding: 15px;
+    padding: 20px;
   }
   
   .workflow-properties {
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
+  }
+
+  .property {
+    text-align: center;
   }
 }
 
 @media (max-width: 480px) {
   .header {
-    padding: 15px;
+    padding: 24px 16px;
+    margin-bottom: 30px;
   }
   
   .header h1 {
     font-size: 1.8rem;
+    letter-spacing: 1px;
+  }
+
+  .selected-info {
+    font-size: 1rem;
+    padding: 10px 20px;
   }
   
   .category-header {
-    flex-direction: column;
-    gap: 10px;
+    grid-template-columns: 1fr;
+    padding: 16px 20px;
     text-align: center;
+  }
+
+  .category-header h2 {
+    font-size: 1.4rem;
+    justify-self: center;
   }
   
   .workflows-container {
-    padding: 15px;
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .workflow-card {
+    padding: 16px;
+  }
+
+  .gramatica-content h3 {
+    font-size: 1.2rem;
   }
 }
