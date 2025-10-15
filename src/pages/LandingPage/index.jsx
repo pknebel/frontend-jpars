@@ -80,15 +80,6 @@ export const LandingPage = () => {
 
   return (
     <div className="landing-page">
-      {/* Cabeçalho */}
-      <header className="landing-header">
-        <div className="header-content">
-          <h1 className="main-title">JPARS</h1>
-          <p className="subtitle">Ferramenta de apoio ao estudo de Análise Léxica e Sintática</p>
-        </div>
-      </header>
-
-      {/* Seção Introdutória */}
       <section className="intro-section">
         <div className="intro-content">
           <h2>Bem-vindo ao JPARS</h2>

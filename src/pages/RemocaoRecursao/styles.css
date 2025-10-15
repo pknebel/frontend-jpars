@@ -302,19 +302,25 @@
 
 /* Feedback Messages */
 .feedback-message {
-  width: 100%;
-  max-width: 800px;
+  width: 1100px;
+  height: 50px;
   margin: 20px auto 0 auto;
   padding: 12px 20px;
   border-radius: 12px;
   font-weight: 600;
   font-size: 0.95rem;
-  line-height: 1.4;
+  line-height: 1;
   text-align: center;
   animation: slideIn 0.3s ease;
   box-sizing: border-box;
   word-break: break-word;
   overflow-wrap: break-word;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .feedback-message.success {
@@ -374,7 +380,8 @@
 
 /* Error State */
 .error {
-  max-width: 600px;
+  max-width: 1100px;
+  height: 50px;
   margin: 60px auto;
   text-align: center;
   padding: 40px;
@@ -387,7 +394,7 @@
   margin-bottom: 16px;
   color: #c62828;
   font-size: 2rem;
-  font-weight: 600;
+  font-weight: 50px;
 }
 
 .error p {
@@ -432,6 +439,11 @@
 @media (max-width: 768px) {
   .remocao-recursao {
     padding: 20px 15px;
+  }
+
+  .feedback-message {
+    width: 100%;
+    max-width: 90vw;
   }
 
   .header {
