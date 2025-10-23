@@ -10,9 +10,9 @@ export const LandingPage = () => {
   const videos = [
     {
       id: 'video1',
-      title: 'Introdução à Análise Sintática',
-      url: 'https://www.youtube.com/embed/1QNb-OXYRmU',
-      description: 'Conceitos fundamentais da análise sintática'
+      title: 'Introdução à Análise Léxica',
+      url: 'https://www.youtube.com/watch?v=uj00_gvCSKk&t=54s',
+      description: 'Conceitos fundamentais da análise léxica'
     },
     {
       id: 'video2',
@@ -99,7 +99,7 @@ export const LandingPage = () => {
       {/* Carrossel de Vídeos */}
       <section className="video-section">
         <div className="section-header">
-          <h2>Vídeos Educativos - Análise Sintática</h2>
+          <h2>Vídeos Educativos</h2>
           <p>Aprenda com vídeos explicativos sobre os principais conceitos</p>
         </div>
         

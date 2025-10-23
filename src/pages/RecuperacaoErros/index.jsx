@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGramatica } from '../../contexts/GramaticaContext';
 import HelpModal from '../../components/HelpModal';
+import MessageBox from '../../components/MessageBox';
+import Button from '../../components/Button';
 import './styles.css';
 
 export default function RecuperacaoErros() {
@@ -522,29 +524,29 @@ export default function RecuperacaoErros() {
 
           {/* Botões de ação */}
           <div className="action-buttons">
-            <button 
-              className="btn btn-validate" 
+            <Button
+              variant="primary"
               onClick={handleValidate}
-              disabled={isValidating || isInputDisabled}
+              disabled={isInputDisabled}
+              loading={isValidating}
             >
               {isValidating ? 'Validando...' : 'Validar'}
-            </button>
+            </Button>
             
-            <button 
-              className="btn btn-next" 
+            <Button
+              variant="success"
               onClick={handleNext}
               disabled={!isValidated}
             >
               Próximo
-            </button>
+            </Button>
           </div>
 
           {/* Mensagens de feedback */}
-          {message && (
-            <div className={`feedback-message ${messageType}`}>
-              {message}
-            </div>
-          )}
+          <MessageBox
+            type={messageType}
+            message={message}
+          />
         </section>
       </main>
 

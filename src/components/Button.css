@@ -1,0 +1,272 @@
+/* Button Component - Design Unificado Retangular com Bordas Arredondadas */
+
+/* Base Button Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 32px;
+  border: none;
+  border-radius: 12px; /* Bordas arredondadas */
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  text-align: center;
+  white-space: nowrap;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+  min-width: 160px;
+  height: 48px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+/* Button Variants */
+.btn-primary {
+  background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 74, 173, 0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #003d8f 0%, #0052a3 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 74, 173, 0.4);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+.btn-success:hover:not(:disabled) {
+  background: linear-gradient(135deg, #229954 0%, #27ae60 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(39, 174, 96, 0.4);
+}
+
+.btn-info {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.btn-info:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2980b9 0%, #21618c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(52, 152, 219, 0.4);
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
+}
+
+.btn-warning:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(243, 156, 18, 0.4);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(231, 76, 60, 0.4);
+}
+
+/* Button Sizes */
+.btn-small {
+  padding: 10px 24px;
+  font-size: 0.9rem;
+  min-width: 120px;
+  height: 40px;
+  border-radius: 10px;
+}
+
+.btn-medium {
+  padding: 14px 32px;
+  font-size: 1rem;
+  min-width: 160px;
+  height: 48px;
+  border-radius: 12px;
+}
+
+.btn-large {
+  padding: 18px 40px;
+  font-size: 1.1rem;
+  min-width: 200px;
+  height: 56px;
+  border-radius: 14px;
+}
+
+/* Button States */
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn:disabled,
+.btn-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.btn-loading {
+  cursor: wait;
+  pointer-events: none;
+}
+
+/* Loading Spinner */
+.btn-spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  animation: spin 1s linear infinite;
+}
+
+.btn-spinner svg {
+  width: 16px;
+  height: 16px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Text States */
+.btn-text-loading {
+  opacity: 0.7;
+}
+
+.btn-text {
+  transition: opacity 0.3s ease;
+}
+
+/* Focus States */
+.btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.btn:focus:not(:focus-visible) {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Ripple Effect */
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .btn {
+    min-width: 140px;
+    height: 44px;
+    padding: 12px 28px;
+    font-size: 0.95rem;
+  }
+  
+  .btn-small {
+    min-width: 100px;
+    height: 36px;
+    padding: 8px 20px;
+    font-size: 0.85rem;
+  }
+  
+  .btn-large {
+    min-width: 180px;
+    height: 52px;
+    padding: 16px 36px;
+    font-size: 1.05rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn {
+    min-width: 120px;
+    height: 40px;
+    padding: 10px 24px;
+    font-size: 0.9rem;
+    border-radius: 10px;
+  }
+  
+  .btn-small {
+    min-width: 80px;
+    height: 32px;
+    padding: 6px 16px;
+    font-size: 0.8rem;
+  }
+  
+  .btn-large {
+    min-width: 160px;
+    height: 48px;
+    padding: 14px 32px;
+    font-size: 1rem;
+  }
+}
+
+/* Action Buttons Container */
+.action-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .action-buttons {
+    gap: 15px;
+    margin-top: 25px;
+    margin-bottom: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .action-buttons .btn {
+    width: 100%;
+    max-width: 280px;
+  }
+}

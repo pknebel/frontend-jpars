@@ -129,16 +129,16 @@
 
 /* Botão Validar */
 .btn-validar {
-  padding: 12px 24px;
+  padding: 12px 32px;
   background-color: #27ae60;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-width: 120px;
+  min-width: 140px;
   height: 48px;
   display: flex;
   align-items: center;
@@ -484,16 +484,16 @@
 }
 
 .non-terminal-header {
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
   font-weight: 600;
-  color: #2c3e50;
+  color: #ffffff;
   min-width: 100px;
 }
 
 .terminal-header {
-  background: #e9ecef;
+  background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
   font-weight: 600;
-  color: #495057;
+  color: #ffffff;
   min-width: 80px;
 }
 
@@ -650,16 +650,16 @@
 }
 
 .btn-next {
-  padding: 12px 24px;
+  padding: 12px 32px;
   background-color: #3498db;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-width: 120px;
+  min-width: 140px;
   height: 48px;
   display: flex;
   align-items: center;

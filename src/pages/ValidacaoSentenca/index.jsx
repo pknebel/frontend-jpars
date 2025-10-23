@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGramatica } from '../../contexts/GramaticaContext';
+import ModalResultadoValidacao from '../../components/ModalResultadoValidacao';
+import MessageBox from '../../components/MessageBox';
+import Button from '../../components/Button';
 import './styles.css';
 
 export default function ValidacaoSentenca() {
@@ -26,6 +29,11 @@ export default function ValidacaoSentenca() {
   const [isValidationComplete, setIsValidationComplete] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [currentValidationMessage, setCurrentValidationMessage] = useState('');
+  
+  // Estados para o modal
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState('sucesso');
+  const [modalMessage, setModalMessage] = useState('');
 
   useEffect(() => {
     const loadSentencas = async () => {
@@ -196,6 +204,19 @@ export default function ValidacaoSentenca() {
       const response = await fetch('http://localhost:8080/jpars/sentenca/validar');
       
       if (!response.ok) {
+        // Verificar se é erro 500 para capturar mensagem de erro do backend
+        if (response.status === 500) {
+          try {
+            const errorData = await response.json();
+            const errorMessage = errorData.mensagemErro || 'Erro interno do servidor durante a validação.';
+            showErrorModal(errorMessage);
+            return;
+          } catch (parseError) {
+            console.error('Erro ao fazer parse da resposta de erro:', parseError);
+            showErrorModal('Erro interno do servidor durante a validação.');
+            return;
+          }
+        }
         throw new Error(`Erro ao avançar validação: HTTP ${response.status}: ${response.statusText}`);
       }
 
@@ -210,12 +231,14 @@ export default function ValidacaoSentenca() {
       // Processar lógica de validação de terminais
       processValidationLogic(nextStepData);
 
-      // Verificar se a validação foi concluída
+      // Verificar se a validação foi concluída com sucesso
       if (nextStepData.mensagemSucesso) {
         setIsValidationComplete(true);
         setSuccessMessage(nextStepData.mensagemSucesso);
         setMessage(`Validação concluída: ${nextStepData.mensagemSucesso}`);
         setMessageType('success');
+        // Mostrar modal de sucesso
+        showSuccessModal(nextStepData.mensagemSucesso);
       } else if (nextStepData.pilha && nextStepData.pilha.length === 0) {
         setIsValidationComplete(true);
         setMessage('A análise foi concluída.');
@@ -229,9 +252,35 @@ export default function ValidacaoSentenca() {
       console.error('Erro ao avançar validação:', error);
       setMessage('Erro ao avançar a validação. Verifique se o backend está rodando.');
       setMessageType('error');
+      // Mostrar modal de erro para erros de rede ou outros
+      showErrorModal('Erro de conexão. Verifique se o backend está rodando.');
     } finally {
       setIsNextLoading(false);
     }
+  };
+
+  // Funções para lidar com o modal
+  const handleModalClose = () => {
+    setShowModal(false);
+    setModalMessage('');
+  };
+
+  const handleModalConfirm = () => {
+    setShowModal(false);
+    setModalMessage('');
+    navigate('/selecao-gramatica');
+  };
+
+  const showSuccessModal = (message) => {
+    setModalType('sucesso');
+    setModalMessage(message);
+    setShowModal(true);
+  };
+
+  const showErrorModal = (message) => {
+    setModalType('erro');
+    setModalMessage(message);
+    setShowModal(true);
   };
 
   // Função para processar a lógica de validação
@@ -245,27 +294,41 @@ export default function ValidacaoSentenca() {
 
     const topoPilha = pilha[pilha.length - 1];
     const isNonTerminal = /^[A-Z]$/.test(topoPilha);
-    const isTerminal = /^[a-z]$/.test(topoPilha);
+    
+    // Se o topo da pilha NÃO é um não-terminal (letra maiúscula única), é um terminal
+    const isTerminal = !isNonTerminal;
+
+    console.log('Estado da pilha:', {
+      topoPilha,
+      isNonTerminal,
+      isTerminal,
+      indexSentenca,
+      sentencaLength: sentenca?.length
+    });
 
     if (isTerminal) {
       // Lógica para validação de terminais
       if (indexSentenca < sentenca.length) {
         const elementoAtual = sentenca[indexSentenca];
         
+        console.log('Comparando terminal:', {
+          topoPilha,
+          elementoAtual,
+          isMatch: topoPilha === elementoAtual
+        });
+        
         if (topoPilha === elementoAtual) {
           const validationMessage = `Elemento ${elementoAtual} validado`;
           setCurrentValidationMessage(validationMessage);
-          console.log('Validação de terminal:', validationMessage);
+          console.log('✓ Validação de terminal:', validationMessage);
         } else {
           setCurrentValidationMessage('');
         }
       } else {
         setCurrentValidationMessage('');
       }
-    } else if (isNonTerminal) {
-      // Para não-terminais, limpar mensagem de validação de terminal
-      setCurrentValidationMessage('');
     } else {
+      // Para não-terminais, limpar mensagem de validação de terminal
       setCurrentValidationMessage('');
     }
   };
@@ -374,21 +437,21 @@ export default function ValidacaoSentenca() {
               </select>
             </div>
             
-            <button
-              className="btn-validar"
+            <Button
+              variant="success"
               onClick={handleValidar}
-              disabled={!sentencaSelecionada || sentencas.length === 0 || isValidating}
+              disabled={!sentencaSelecionada || sentencas.length === 0}
+              loading={isValidating}
             >
               {isValidating ? 'Iniciando...' : 'Validar'}
-            </button>
+            </Button>
           </div>
 
           {/* Mensagens de feedback */}
-          {message && (
-            <div className={`feedback-message ${messageType}`}>
-              {message}
-            </div>
-          )}
+          <MessageBox
+            type={messageType}
+            message={message}
+          />
         </section>
 
         {/* Área de Exibição da Sentença */}
@@ -504,13 +567,14 @@ export default function ValidacaoSentenca() {
         {hasStartedValidation && (
           <section className="next-section">
             <div className="next-button-container">
-              <button
-                className="btn-next"
+              <Button
+                variant="info"
                 onClick={handleNext}
-                disabled={isValidationComplete || !hasStartedValidation || isNextLoading}
+                disabled={isValidationComplete || !hasStartedValidation}
+                loading={isNextLoading}
               >
                 {isNextLoading ? 'Processando...' : 'Próximo'}
-              </button>
+              </Button>
             </div>
           </section>
         )}
@@ -526,6 +590,18 @@ export default function ValidacaoSentenca() {
           </section>
         )}
       </main>
+
+      {/* Modal de Resultado da Validação */}
+      <ModalResultadoValidacao
+        isOpen={showModal}
+        tipo={modalType}
+        mensagem={modalMessage}
+        onConfirm={handleModalConfirm}
+        onClose={handleModalClose}
+        showConfirmButton={modalType === 'sucesso'}
+        confirmText="Sim"
+        closeText={modalType === 'sucesso' ? 'Não' : 'Fechar'}
+      />
     </div>
   );
 }
