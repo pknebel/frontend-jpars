@@ -12,10 +12,11 @@
   box-sizing: border-box;
   animation: slideIn 0.3s ease;
   position: relative;
-  min-height: 50px;
+  min-height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Conteúdo da mensagem */
@@ -78,11 +79,13 @@
   stroke-width: 2;
 }
 
-/* Variantes de tipo */
+/* Variantes de tipo - Todas com as mesmas dimensões, apenas cores diferentes */
 .message-box.success {
   background: #e8f5e9;
   color: #2e7d32;
   border: 2px solid #81c784;
+  min-height: 56px;
+  padding: 16px 20px;
 }
 
 .message-box.success .message-icon svg {
@@ -93,16 +96,30 @@
   background: #ffebee;
   color: #c62828;
   border: 2px solid #ef9a9a;
+  min-height: 56px;
+  padding: 16px 20px;
 }
 
 .message-box.error .message-icon svg {
   color: #c62828;
 }
 
+.message-box.error .message-text {
+  text-align: center;
+}
+
+.message-box.error .message-text p {
+  color: #c62828;
+  text-align: center;
+  margin: 0 auto;
+}
+
 .message-box.info {
   background: #e3f2fd;
   color: #1565c0;
   border: 2px solid #90caf9;
+  min-height: 56px;
+  padding: 16px 20px;
 }
 
 .message-box.info .message-icon svg {
@@ -136,7 +153,14 @@
     margin: 15px auto 0 auto;
     padding: 14px 16px;
     font-size: 0.9rem;
-    min-height: 45px;
+    min-height: 50px;
+  }
+  
+  .message-box.success,
+  .message-box.error,
+  .message-box.info {
+    padding: 14px 16px;
+    min-height: 50px;
   }
   
   .message-content {
@@ -157,7 +181,14 @@
   .message-box {
     padding: 12px 14px;
     font-size: 0.85rem;
-    min-height: 40px;
+    min-height: 48px;
+  }
+  
+  .message-box.success,
+  .message-box.error,
+  .message-box.info {
+    padding: 12px 14px;
+    min-height: 48px;
   }
   
   .message-content {
@@ -178,8 +209,15 @@
 .message-box.compact {
   margin: 10px 0;
   padding: 12px 16px;
-  min-height: 40px;
+  min-height: 44px;
   font-size: 0.9rem;
+}
+
+.message-box.compact.success,
+.message-box.compact.error,
+.message-box.compact.info {
+  padding: 12px 16px;
+  min-height: 44px;
 }
 
 .message-box.compact .message-icon svg {

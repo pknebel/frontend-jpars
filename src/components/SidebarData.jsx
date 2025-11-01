@@ -8,7 +8,12 @@ import * as TbIcons from "react-icons/tb"
 
 export const SidebarData = [
     {
-        title: 'Gramática',
+        title: 'Home',
+        path: '/',
+        icon: <FaIcons.FaHome />,
+    },
+    {
+        title: 'Gramática Livre de Contexto',
         icon: <BsIcons.Bs1CircleFill />,
         iconClosed: <FaIcons.FaAngleDown />,
         iconOpened: <FaIcons.FaAngleUp />,
