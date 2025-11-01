@@ -366,7 +366,7 @@ export default function GeracaoTabelaSintatica() {
             <iframe
               width="100%"
               height="315"
-              src="https://www.youtube.com/embed/zY4w4_W30aQ?start=1500"
+              src="https://www.youtube.com/embed/qQFun2hiW88"
               title="Geração da Tabela Sintática"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

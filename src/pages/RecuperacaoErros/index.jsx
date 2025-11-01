@@ -435,7 +435,7 @@ export default function RecuperacaoErros() {
             <iframe
               width="100%"
               height="315"
-              src="https://www.youtube.com/embed/zY4w4_W30aQ?start=1800"
+              src="https://www.youtube.com/embed/C60oCQUgz94"
               title="Recuperação de Erros"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

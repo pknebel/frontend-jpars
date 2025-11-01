@@ -238,7 +238,7 @@ export default function RemocaoRecursao() {
             <iframe
               width="100%"
               height="315"
-              src="https://www.youtube.com/embed/zY4w4_W30aQ?start=832"
+              src="https://www.youtube.com/embed/MkWM1qMOrrI"
               title="Remoção de Recursão à Esquerda"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
