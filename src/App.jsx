@@ -9,7 +9,7 @@ import FirstFollow from './pages/FirstFollow';
 import GeracaoTabelaSintatica from './pages/GeracaoTabelaSintatica/index';
 import RecuperacaoErros from './pages/RecuperacaoErros/index';
 import ValidacaoSentenca from './pages/ValidacaoSentenca';
-import Manual from './pages/Manual';
+import Manual from './pages/Manual/index';
 import styled from 'styled-components';
 import { GramaticaProvider } from './contexts/GramaticaContext';
 

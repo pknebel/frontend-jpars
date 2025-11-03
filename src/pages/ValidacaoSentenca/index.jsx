@@ -538,7 +538,7 @@ export default function ValidacaoSentenca() {
                                 className={`production-cell ${shouldHighlightCell(rowIndex, colIndex) ? 'highlighted-cell' : ''}`}
                               >
                                 {col.sync ? (
-                                  <span className="sync-text">synch</span>
+                                  <span className="sync-text">sync</span>
                                 ) : col.producao && col.producao.elementosTransicao.length > 0 ? (
                                   <span className="production-text">
                                     {col.producao.naoTerminal} → {col.producao.elementosTransicao.join(' ')}
