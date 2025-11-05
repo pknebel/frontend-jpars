@@ -50,7 +50,17 @@ export default function ValidacaoSentenca() {
         const response = await fetch(`http://localhost:8080/jpars/sentenca/${idWorkflow}`);
         
         if (!response.ok) {
-          throw new Error(`Erro ao buscar sentenças: HTTP ${response.status}: ${response.statusText}`);
+          // Tentar extrair mensagem de erro do backend
+          let errorMessage = `Erro ao buscar sentenças: HTTP ${response.status}`;
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.mensagemErro || errorData.message || errorData.error || errorMessage;
+          } catch (parseError) {
+            // Se não conseguir fazer parse, usar mensagem padrão
+          }
+          setMessage(errorMessage);
+          setMessageType('error');
+          return;
         }
 
         const sentencasData = await response.json();
@@ -67,7 +77,8 @@ export default function ValidacaoSentenca() {
         
       } catch (error) {
         console.error('Erro ao carregar sentenças:', error);
-        setMessage('Erro ao carregar as sentenças. Verifique se o backend está rodando.');
+        const errorMessage = error.message || 'Erro ao carregar as sentenças. Verifique se o backend está rodando.';
+        setMessage(errorMessage);
         setMessageType('error');
       } finally {
         setIsLoading(false);
@@ -87,7 +98,17 @@ export default function ValidacaoSentenca() {
         const response = await fetch(`http://localhost:8080/jpars/tabela-sintatica/${idWorkflow}`);
         
         if (!response.ok) {
-          throw new Error(`Erro ao buscar tabela sintática: HTTP ${response.status}: ${response.statusText}`);
+          // Tentar extrair mensagem de erro do backend
+          let errorMessage = `Erro ao buscar tabela sintática: HTTP ${response.status}`;
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.mensagemErro || errorData.message || errorData.error || errorMessage;
+          } catch (parseError) {
+            // Se não conseguir fazer parse, usar mensagem padrão
+          }
+          setMessage(errorMessage);
+          setMessageType('error');
+          return;
         }
 
         const tabelaData = await response.json();
@@ -96,7 +117,8 @@ export default function ValidacaoSentenca() {
         
       } catch (error) {
         console.error('Erro ao carregar tabela sintática:', error);
-        setMessage('Erro ao carregar a tabela sintática. Verifique se o backend está rodando.');
+        const errorMessage = error.message || 'Erro ao carregar a tabela sintática. Verifique se o backend está rodando.';
+        setMessage(errorMessage);
         setMessageType('error');
       }
     };
@@ -122,6 +144,22 @@ export default function ValidacaoSentenca() {
       }
     } else {
       setSimbolosSelecionados([]);
+    }
+  };
+
+  // Função auxiliar para extrair mensagem de erro do backend
+  const extractErrorMessage = async (response) => {
+    try {
+      const errorData = await response.json();
+      // Tentar diferentes formatos de mensagem de erro do backend
+      return errorData.mensagemErro || 
+             errorData.message || 
+             errorData.error || 
+             errorData.mensagem ||
+             `Erro HTTP ${response.status}: ${response.statusText}`;
+    } catch (parseError) {
+      console.error('Erro ao fazer parse da resposta de erro:', parseError);
+      return `Erro HTTP ${response.status}: ${response.statusText}`;
     }
   };
 
@@ -158,7 +196,11 @@ export default function ValidacaoSentenca() {
       const response = await fetch(`http://localhost:8080/jpars/sentenca/iniciar-validacao/${idWorkflow}/${sentencaEncontrada.idSentenca}`);
       
       if (!response.ok) {
-        throw new Error(`Erro ao iniciar validação: HTTP ${response.status}: ${response.statusText}`);
+        const errorMessage = await extractErrorMessage(response);
+        setMessage(errorMessage);
+        setMessageType('error');
+        showErrorModal(errorMessage);
+        return;
       }
 
       const validationData = await response.json();
@@ -183,8 +225,10 @@ export default function ValidacaoSentenca() {
 
     } catch (error) {
       console.error('Erro na validação:', error);
-      setMessage('Erro ao iniciar a validação. Verifique se o backend está rodando.');
+      const errorMessage = error.message || 'Erro ao iniciar a validação. Verifique se o backend está rodando.';
+      setMessage(errorMessage);
       setMessageType('error');
+      showErrorModal(errorMessage);
     } finally {
       setIsValidating(false);
     }
@@ -204,20 +248,12 @@ export default function ValidacaoSentenca() {
       const response = await fetch('http://localhost:8080/jpars/sentenca/validar');
       
       if (!response.ok) {
-        // Verificar se é erro 500 para capturar mensagem de erro do backend
-        if (response.status === 500) {
-          try {
-            const errorData = await response.json();
-            const errorMessage = errorData.mensagemErro || 'Erro interno do servidor durante a validação.';
-            showErrorModal(errorMessage);
-            return;
-          } catch (parseError) {
-            console.error('Erro ao fazer parse da resposta de erro:', parseError);
-            showErrorModal('Erro interno do servidor durante a validação.');
-            return;
-          }
-        }
-        throw new Error(`Erro ao avançar validação: HTTP ${response.status}: ${response.statusText}`);
+        // Capturar mensagem de erro do backend
+        const errorMessage = await extractErrorMessage(response);
+        setMessage(errorMessage);
+        setMessageType('error');
+        showErrorModal(errorMessage);
+        return;
       }
 
       const nextStepData = await response.json();
@@ -250,10 +286,11 @@ export default function ValidacaoSentenca() {
 
     } catch (error) {
       console.error('Erro ao avançar validação:', error);
-      setMessage('Erro ao avançar a validação. Verifique se o backend está rodando.');
+      const errorMessage = error.message || 'Erro de conexão. Verifique se o backend está rodando.';
+      setMessage(errorMessage);
       setMessageType('error');
       // Mostrar modal de erro para erros de rede ou outros
-      showErrorModal('Erro de conexão. Verifique se o backend está rodando.');
+      showErrorModal(errorMessage);
     } finally {
       setIsNextLoading(false);
     }
