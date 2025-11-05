@@ -13,6 +13,19 @@
   animation: fadeIn 0.3s ease-out;
 }
 
+/* Proteger todos os elementos do modal de classes .error globais */
+.modal-overlay *,
+.modal-overlay *::before,
+.modal-overlay *::after {
+  box-sizing: border-box;
+}
+
+.modal-overlay .error {
+  /* Garantir que classes .error do modal não sejam afetadas por classes globais */
+  min-height: auto !important;
+  height: auto !important;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -32,6 +45,9 @@
   max-height: 90vh;
   overflow: hidden;
   animation: slideIn 0.3s ease-out;
+  /* Proteger de classes .error globais */
+  min-height: auto !important;
+  height: auto !important;
 }
 
 @keyframes slideIn {
@@ -60,6 +76,9 @@
 .modal-header.error {
   background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
   color: white;
+  /* Proteger de classes .error globais que podem ter min-height: 50vh ou height fixo */
+  min-height: auto !important;
+  height: auto !important;
 }
 
 .modal-icon {
@@ -160,6 +179,20 @@
   box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
 }
 
+.btn-confirm.error {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  box-shadow: 0 2px 4px rgba(231, 76, 60, 0.3);
+}
+
+.btn-confirm.error:hover {
+  background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.4);
+}
+
+.btn-confirm.error:active {
+  box-shadow: 0 2px 4px rgba(231, 76, 60, 0.3);
+}
+
 .btn-close {
   background: #6c757d;
   color: white;
@@ -178,13 +211,20 @@
 }
 
 .btn-close.error {
-  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-  box-shadow: 0 2px 4px rgba(231, 76, 60, 0.3);
+  background: #6c757d;
+  box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);
+  /* Proteger de classes .error globais que podem ter min-height: 50vh ou height fixo */
+  min-height: auto !important;
+  height: 44px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .btn-close.error:hover {
-  background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
-  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.4);
+  background: #5a6268;
+  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.4);
 }
 
 /* Responsive Design */

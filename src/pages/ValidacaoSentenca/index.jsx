@@ -635,9 +635,9 @@ export default function ValidacaoSentenca() {
         mensagem={modalMessage}
         onConfirm={handleModalConfirm}
         onClose={handleModalClose}
-        showConfirmButton={modalType === 'sucesso'}
+        showConfirmButton={true}
         confirmText="Sim"
-        closeText={modalType === 'sucesso' ? 'Não' : 'Fechar'}
+        closeText="Não"
       />
     </div>
   );

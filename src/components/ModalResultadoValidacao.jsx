@@ -51,9 +51,9 @@ const ModalResultadoValidacao = ({
         </div>
 
         <div className={`modal-footer ${!showConfirmButton ? 'single-button' : ''}`}>
-          {showConfirmButton && isSuccess && (
+          {showConfirmButton && (
             <button 
-              className="btn-confirm"
+              className={`btn-confirm ${isError ? 'error' : ''}`}
               onClick={onConfirm}
             >
               {confirmText}
@@ -64,7 +64,7 @@ const ModalResultadoValidacao = ({
             className={`btn-close ${isError ? 'error' : ''}`}
             onClick={onClose}
           >
-            {isSuccess ? closeText : closeText}
+            {closeText}
           </button>
         </div>
       </div>
