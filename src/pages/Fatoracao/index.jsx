@@ -12,6 +12,7 @@ export default function Fatoracao() {
   
   // Estados da aplicação
   const [selectedWorkflow, setSelectedWorkflow] = useState(null);
+  const [gramaticaSemRecursao, setGramaticaSemRecursao] = useState('');
   const [gramaticaFatorada, setGramaticaFatorada] = useState('');
   const [isValidated, setIsValidated] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
@@ -46,6 +47,44 @@ export default function Fatoracao() {
       }, 2000);
     }
   }, [gramaticaSelecionada, hasGramaticaSelecionada, navigate]);
+
+  // Carregar a gramática sem recursão do backend
+  useEffect(() => {
+    const loadGramaticaSemRecursao = async () => {
+      if (!idWorkflow) return;
+      
+      try {
+        console.log(`Buscando gramática sem recursão para o workflow ID: ${idWorkflow}`);
+        const response = await fetch(`http://localhost:8080/jpars/gramatica/sem-recursao/${idWorkflow}`);
+        
+        if (!response.ok) {
+          // Tentar extrair mensagem de erro do backend
+          let errorMessage = `Erro ao buscar gramática sem recursão: HTTP ${response.status}`;
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.mensagemErro || errorData.message || errorData.error || errorMessage;
+          } catch (parseError) {
+            // Se não conseguir fazer parse, usar mensagem padrão
+          }
+          setMessage(errorMessage);
+          setMessageType('error');
+          return;
+        }
+
+        const gramaticaText = await response.text();
+        console.log('Gramática sem recursão recebida:', gramaticaText);
+        setGramaticaSemRecursao(gramaticaText);
+        
+      } catch (error) {
+        console.error('Erro ao carregar gramática sem recursão:', error);
+        const errorMessage = error.message || 'Erro ao carregar a gramática sem recursão. Verifique se o backend está rodando.';
+        setMessage(errorMessage);
+        setMessageType('error');
+      }
+    };
+
+    loadGramaticaSemRecursao();
+  }, [idWorkflow]);
 
   // Função para buscar a resposta correta do backend
   const buscarRespostaCorreta = async () => {
@@ -247,15 +286,19 @@ export default function Fatoracao() {
           <h2>Agora pratique com a gramática que escolheu:</h2>
           
           <div className="practice-grid">
-            {/* Quadro 1: Gramática selecionada */}
+            {/* Quadro 1: Gramática sem recursão */}
             <div className="grammar-card">
               <h3>Gramática Original</h3>
               <div className="grammar-content">
-                {selectedWorkflow.gramatica.split('\n').map((line, index) => (
-                  <div key={index} className="grammar-line">
-                    {line}
-                  </div>
-                ))}
+                {gramaticaSemRecursao ? (
+                  gramaticaSemRecursao.split('\n').map((line, index) => (
+                    <div key={index} className="grammar-line">
+                      {line}
+                    </div>
+                  ))
+                ) : (
+                  <div className="grammar-line">Carregando gramática...</div>
+                )}
               </div>
             </div>
 
